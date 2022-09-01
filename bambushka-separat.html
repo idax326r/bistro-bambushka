@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap" rel="stylesheet"> 
+    <title>Bistro Bambushka</title>
+    <style>
+      .site-header {
+        border-bottom: 2px solid orange;
+        padding: 0.5em 1em;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .site-identity h1 {
+      font-size: 1.9em;
+        margin: 0.7em 0;
+        display: inline-block;
+        font-family: 'Kalam', cursive;
+        font-style: italic;
+        margin-right: 25px;
+      }
+      a {
+        text-decoration: none;
+        color: #000;
+      }
+
+      .valgt {
+        background-color: rgb(255, 162, 0);
+      }
+
+      button {
+   border: 1px black;
+        background-color: white;
+        padding: 8px 10px;
+        text-align: center;
+        margin: 8px 10px;
+        cursor: pointer;
+        border-style: solid;
+        font-family: 'Kalam', cursive;
+      }
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        padding: 15px;
+      }
+
+      .oplysning {
+      margin-left: 150px;
+      font-family: 'Kalam', cursive;
+      }
+
+      #holder {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1em;
+        padding: 10px 150px 100px 150px;
+      }
+
+      article {
+background-color: rgb(233, 244, 255);        /* border: 1px solid orange; */
+        padding: 1em;
+        cursor: pointer;
+      }
+      article:nth-child(2n) {
+     background-color: rgb(193, 224, 255);
+    }
+
+      img {
+        max-width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: contain;
+      }
+      #popop {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        background-color: #000000aa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* skjul  */
+        display: none;
+      }
+
+      #popop article {
+        width: 50%;
+        background-color: white;
+      }
+
+        footer {
+        text-align: center;
+        padding: 15px;
+ }
+
+      @media (max-width: 800px) {
+        #holder {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1em;
+          padding: 10px 25px 10px 25px;
+        }
+         .oplysning {
+      margin-left: 0px;
+      }
+      }
+      @media (max-width: 650px) {
+        #holder {
+          display: grid;
+          grid-template-columns: repeat(1, 1fr);
+          gap: 1em;
+          padding: 10px 25px 10px 25px;
+        }
+          nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+         .oplysning {
+      margin-left: 0px;
+      }
+      }
+    </style>
+  </head>
+  <body>
+    
+
+    <header class="site-header">
+      <nav>
+        <button data-kategori="alle" class="valgt">Alle</button>
+        <button data-kategori="forretter">Forretter</button>
+        <button data-kategori="hovedretter">Hovedretter</button>
+        <button data-kategori="desserter">Desserter</button>
+        <button data-kategori="drikkevarer">Drikkevarer</button>
+      </nav>
+        <div class="site-identity">
+        <h1><a href="bambushka-separat.html">Bistro Bambushka</a></h1>
+      </div>
+    </header>
+    <h2 class="oplysning">Alle</h2>
+    <main id="holder"></main>
+    <template>
+      <article>
+        <img src="" alt="" />
+        <h2 class="navn"></h2>
+        <p class="info"></p>
+        <p class="pris"></p>
+      </article>
+    </template>
+    <!-- pop up single view -->
+    <section id="popop">
+        <div id="luk">&#x2715</div>
+      <article>
+        <img class="" alt="" />
+        <h1></h1>
+        <p></p>
+        <p></p>
+        <p></p>
+      </article>
+    </div>
+    </section>
+    <footer>©2022 Bistro Bambushka. All Rights Reserved</footer>
+    <script>
+      const url = "https://babushka-dd8a.restdb.io/rest/menu";
+      const options = {
+        headers: {
+          "x-apikey": "600ec2fb1346a1524ff12de4",
+        },
+      };
+
+      document.addEventListener("DOMContentLoaded", start);
+      let retter;
+      let filter = "alle";
+      const header = document.querySelector("h2");
+
+      // første funktion der kaldes efter DOM er loadet
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) => knap.addEventListener("click", filtrerRetter));
+        hentData();
+      }
+
+      function filtrerRetter() {
+        // sæt variablen filter til værdien af data-troende på den knap
+        filter = this.dataset.kategori;
+        // fjern klassen valgt
+        document.querySelector(".valgt").classList.remove("valgt");
+        // marker den knap der er klikket på
+        this.classList.add("valgt");
+        // kald funktionen visRetter efter det nye filter er sat
+        visRetter();
+        header.textContent = this.textContent;
+      }
+
+      async function hentData() {
+        const response = await fetch(url, options);
+        retter = await response.json();
+        // viser array
+        console.log(retter);
+        visRetter();
+      }
+
+      // funktion der viser personer i liste view
+      function visRetter() {
+        const holder = document.querySelector("#holder");
+        const template = document.querySelector("template").content;
+        // den reloader?
+        holder.textContent = "";
+        retter.forEach((ret) => {
+          console.log("kategori", ret.kategori);
+          if (filter == "alle" || filter == ret.kategori) {
+            const klon = template.cloneNode(true);
+                  // indsæt her
+            klon.querySelector("article").addEventListener("click", () => {
+              visDetaljer(ret._id);
+            });
+            klon.querySelector("img").src = "billeder/" + ret.billednavn + "-md.jpg";
+            // vælger artiklen
+            klon.querySelector("article").addEventListener("click", () => visRet(ret));
+            klon.querySelector(".navn").textContent = ret.navn;
+            klon.querySelector(".info").innerHTML = ret.kortbeskrivelse;
+            klon.querySelector(".pris").innerHTML = "Pris: " + ret.pris + " kr.";
+
+            holder.appendChild(klon);
+          }
+        });
+      }
+      function visDetaljer(id) {
+        console.log(id);
+        // sender parameter med ved hjælp af "?"
+        location.href = "singleview.html?id=" + id;
+      }
+
+      hentData();
+    </script>
+  </body>
+</html>
